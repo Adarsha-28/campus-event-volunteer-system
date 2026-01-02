@@ -15,6 +15,7 @@ export const AuthProvider = ({ children }) => {
       if (currentUser) {
         setUser(currentUser);
 
+        // Get user role from Firestore
         const snap = await getDoc(doc(db, "users", currentUser.uid));
         if (snap.exists()) {
           setRole(snap.data().role);
@@ -30,8 +31,8 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, role }}>
-      {!loading && children}
+    <AuthContext.Provider value={{ user, role, loading }}>
+      {children}
     </AuthContext.Provider>
   );
 };

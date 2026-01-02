@@ -1,18 +1,18 @@
-import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../firebase/firebase";
+import { collection, getDocs } from "firebase/firestore";
 
-/* Organizer events */
-export const getOrganizerEvents = async (uid) => {
-  const q = query(
-    collection(db, "events"),
-    where("organizerId", "==", uid)
-  );
-  const snap = await getDocs(q);
-  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+const getAllEvents = async () => {
+  try {
+    const querySnapshot = await getDocs(collection(db, "events"));
+    const events = [];
+    querySnapshot.forEach((doc) => {
+      events.push({ id: doc.id, ...doc.data() });
+    });
+    return events;
+  } catch (err) {
+    console.error("Error fetching events:", err);
+    return [];
+  }
 };
 
-/* All events */
-export const getAllEvents = async () => {
-  const snap = await getDocs(collection(db, "events"));
-  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-};
+export default getAllEvents;

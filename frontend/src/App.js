@@ -4,7 +4,6 @@ import Login from "./pages/Login";
 import AdminDashboard from "./pages/AdminDashboard";
 import OrganizerDashboard from "./pages/OrganizerDashboard";
 import UserDashboard from "./pages/UserDashboard";
-import Events from "./pages/Events";
 import MainLayout from "./components/layout/MainLayout";
 import ProtectedRoute from "./routes/ProtectedRoute";
 
@@ -40,15 +39,6 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={["user"]}>
                 <UserDashboard />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/events"
-            element={
-              <ProtectedRoute allowedRoles={["admin", "organizer", "user"]}>
-                <Events />
               </ProtectedRoute>
             }
           />
