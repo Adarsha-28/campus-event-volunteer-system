@@ -6,6 +6,7 @@ import OrganizerDashboard from "./pages/OrganizerDashboard";
 import UserDashboard from "./pages/UserDashboard";
 import Events from "./pages/Events";
 import MainLayout from "./components/layout/MainLayout";
+import ProtectedRoute from "./routes/ProtectedRoute";
 
 function App() {
   return (
@@ -14,12 +15,43 @@ function App() {
         {/* Public */}
         <Route path="/" element={<Login />} />
 
-        {/* Protected / Website pages */}
+        {/* Protected */}
         <Route element={<MainLayout />}>
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/organizer" element={<OrganizerDashboard />} />
-          <Route path="/user" element={<UserDashboard />} />
-          <Route path="/events" element={<Events />} />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/organizer"
+            element={
+              <ProtectedRoute allowedRoles={["organizer"]}>
+                <OrganizerDashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/user"
+            element={
+              <ProtectedRoute allowedRoles={["user"]}>
+                <UserDashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/events"
+            element={
+              <ProtectedRoute allowedRoles={["admin", "organizer", "user"]}>
+                <Events />
+              </ProtectedRoute>
+            }
+          />
         </Route>
       </Routes>
     </BrowserRouter>

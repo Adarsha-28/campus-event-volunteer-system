@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { auth } from "../firebase/firebase";
 import { onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "../firebase/firebase";
 
 const AuthContext = createContext();
 
@@ -10,32 +11,27 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
+    const unsub = onAuthStateChanged(auth, async (currentUser) => {
+      if (currentUser) {
+        setUser(currentUser);
 
-      if (currentUser?.email === "admin@gmail.com") {
-        setRole("admin");
-      } else if (currentUser?.email === "organizer@gmail.com") {
-        setRole("organizer");
-      } else if (currentUser) {
-        setRole("user");
+        const snap = await getDoc(doc(db, "users", currentUser.uid));
+        if (snap.exists()) {
+          setRole(snap.data().role);
+        }
       } else {
+        setUser(null);
         setRole(null);
       }
-
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => unsub();
   }, []);
-
-  if (loading) {
-    return <div style={{ textAlign: "center" }}>Loading...</div>;
-  }
 
   return (
     <AuthContext.Provider value={{ user, role }}>
-      {children}
+      {!loading && children}
     </AuthContext.Provider>
   );
 };
