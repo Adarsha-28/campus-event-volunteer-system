@@ -15,10 +15,18 @@ export const AuthProvider = ({ children }) => {
       if (currentUser) {
         setUser(currentUser);
 
-        // Get user role from Firestore
-        const snap = await getDoc(doc(db, "users", currentUser.uid));
-        if (snap.exists()) {
-          setRole(snap.data().role);
+        try {
+          const snap = await getDoc(doc(db, "users", currentUser.uid));
+          if (snap.exists()) {
+            // Existing user
+            setRole(snap.data().role);
+          } else {
+            // New user → default role = "user"
+            setRole("user");
+          }
+        } catch (error) {
+          console.error("Error fetching user role:", error);
+          setRole("user"); // fallback
         }
       } else {
         setUser(null);
@@ -31,8 +39,8 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, role, loading }}>
-      {children}
+    <AuthContext.Provider value={{ user, role }}>
+      {!loading && children}
     </AuthContext.Provider>
   );
 };
