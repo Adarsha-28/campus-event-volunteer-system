@@ -15,8 +15,6 @@ const RoleNavbar = () => {
     <nav style={{ padding: 10, background: "#1e40af", color: "#fff" }}>
       <span style={{ marginRight: 20 }}>Role: {role}</span>
 
-      <button onClick={() => navigate("/events")}>Events</button>
-
       {role === "admin" && (
         <button onClick={() => navigate("/admin")}>Admin</button>
       )}
