@@ -1,29 +1,50 @@
 import {
   doc,
-  updateDoc,
-  arrayUnion,
-  serverTimestamp,
   setDoc,
-  getDoc
+  updateDoc,
+  getDoc,
+  collection,
+  addDoc,
+  serverTimestamp
 } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 
-/* INIT CHAT */
-export const initChat = async (eventId) => {
+/* CREATE CHAT PORTAL*/
+export const createChatPortal = async (eventId, organizerId) => {
   const ref = doc(db, "eventChats", eventId);
   const snap = await getDoc(ref);
+
   if (!snap.exists()) {
-    await setDoc(ref, { messages: [] });
+    await setDoc(ref, {
+      active: true,
+      createdBy: organizerId,
+      createdAt: serverTimestamp()
+    });
+  } else {
+    await updateDoc(ref, { active: true });
   }
 };
 
-/* SEND MESSAGE */
-export const sendMessage = async (eventId, userId, text) => {
+/* DELETE CHAT PORTAL*/
+export const deleteChatPortal = async (eventId) => {
   await updateDoc(doc(db, "eventChats", eventId), {
-    messages: arrayUnion({
-      senderId: userId,
-      text,
-      createdAt: serverTimestamp()
-    })
+    active: false
+  });
+};
+
+/* SEND MESSAGE*/
+export const sendMessage = async (eventId, userId, text) => {
+  const userSnap = await getDoc(doc(db, "users", userId));
+  const senderName = userSnap.exists()
+    ? userSnap.data().name
+    : "Unknown";
+
+  const messagesRef = collection(db, "eventChats", eventId, "messages");
+
+  await addDoc(messagesRef, {
+    senderId: userId,
+    senderName,
+    text,
+    createdAt: serverTimestamp()
   });
 };
