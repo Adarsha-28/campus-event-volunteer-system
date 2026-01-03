@@ -1,7 +1,7 @@
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "./firebase";
 
-/*🔍 Check whether user already exists in Firestore*/
+/* Check whether user already exists in Firestore*/
 export const checkUserExists = async (uid) => {
   if (!uid) return null;
 
@@ -15,7 +15,7 @@ export const checkUserExists = async (uid) => {
   return null; // new user
 };
 
-/* 🆕 Save NEW user with SELECTED role (Called ONLY after role selection) */
+/* Save NEW user with SELECTED role (Called ONLY after role selection) */
 export const saveNewUserWithRole = async (user, role) => {
   if (!user || !role) return;
 
@@ -32,7 +32,7 @@ export const saveNewUserWithRole = async (user, role) => {
   console.log("✅ New user saved with role:", role);
 };
 
-/*🔄 Update role (optional – future use)*/
+/* Update role (optional – future use)*/
 export const updateUserRole = async (uid, newRole) => {
   if (!uid || !newRole) return;
 

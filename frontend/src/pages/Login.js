@@ -6,25 +6,34 @@ import "../styles/global.css";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { role } = useAuth();
-  const [loading, setLoading] = useState(false);
+  const { role, needsRoleSelection, loading } = useAuth();
+  const [signingIn, setSigningIn] = useState(false);
 
   useEffect(() => {
-    if (role === "admin") navigate("/admin");
-    else if (role === "organizer") navigate("/organizer");
-    else if (role === "user") navigate("/user");
-  }, [role, navigate]);
+    if (loading) return;
+
+    if (needsRoleSelection) {
+      navigate("/select-role");
+    } else if (role === "admin") {
+      navigate("/admin");
+    } else if (role === "organizer") {
+      navigate("/organizer");
+    } else if (role === "user") {
+      navigate("/user");
+    }
+  }, [role, needsRoleSelection, loading, navigate]);
 
   const handleLogin = async () => {
-    if (loading) return;
-    setLoading(true);
+    if (signingIn) return;
+    setSigningIn(true);
+
     try {
       await googleLogin();
     } catch (err) {
       console.error("Login failed:", err);
       alert(err.message);
     } finally {
-      setLoading(false);
+      setSigningIn(false);
     }
   };
 
@@ -43,20 +52,20 @@ const Login = () => {
         <section className="login-panel">
           <div className="auth-box">
             <h1 className="hero-title">
-              🎓 College Event <br/>Volunteer Management System
+              🎓 College Event <br />Volunteer Management System
             </h1>
             <p className="hero-subtitle">
-              A centralized platform designed for students and faculty to manage 
+              A centralized platform designed for students and faculty to manage
               campus events and volunteer coordination with ease.
             </p>
-            
+
             <div className="action-container">
               <button
                 className="google-signin-btn-blue-small"
                 onClick={handleLogin}
-                disabled={loading}
+                disabled={signingIn}
               >
-                {loading ? "Signing in..." : "Login with Google"}
+                {signingIn ? "Signing in..." : "Login with Google"}
               </button>
             </div>
           </div>
@@ -65,36 +74,21 @@ const Login = () => {
         {/* Right Side */}
         <section className="display-panel">
           <div className="visual-container">
-            <img 
-              src="https://t4.ftcdn.net/jpg/00/32/06/91/360_F_32069160_96JpOLqNYK15MBN3UPlXBpZjuj3HyGqx.jpg" 
-              alt="College Volunteers" 
+            <img
+              src="https://t4.ftcdn.net/jpg/00/32/06/91/360_F_32069160_96JpOLqNYK15MBN3UPlXBpZjuj3HyGqx.jpg"
+              alt="College Volunteers"
               className="permanent-hero-img"
             />
           </div>
-          
+
           <div className="about-content">
             <h2 className="about-heading">✨ About VolunteerHub</h2>
             <ul className="feature-list">
-              <li>
-                <span className="bullet">📅</span> 
-                <p>Find & join campus events easily</p>
-              </li>
-              <li>
-                <span className="bullet">🤝</span> 
-                <p>Volunteer for technical, cultural & social events</p>
-              </li>
-              <li>
-                <span className="bullet">🧑‍💼</span> 
-                <p>Organizers manage events & volunteers</p>
-              </li>
-              <li>
-                <span className="bullet">🛡️</span> 
-                <p>Admins control users, roles & approvals</p>
-              </li>
-              <li>
-                <span className="bullet">⚡</span> 
-                <p>Secure Google login with role-based access</p>
-              </li>
+              <li>📅 Find & join campus events easily</li>
+              <li>🤝 Volunteer for technical, cultural & social events</li>
+              <li>🧑‍💼 Organizers manage events & volunteers</li>
+              <li>🛡️ Admins control users, roles & approvals</li>
+              <li>⚡ Secure Google login with role-based access</li>
             </ul>
           </div>
         </section>
