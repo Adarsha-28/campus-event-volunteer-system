@@ -12,13 +12,12 @@ import { db } from "../firebase/firebase";
 import { useAuth } from "../context/AuthContext";
 import { sendMessage } from "../services/chatService";
 import { canAccessChat } from "../utils/chatUtils";
-
-// Import CSS
 import "../styles/EventChat.css";
 
 const EventChat = () => {
   const { eventId } = useParams();
   const { user } = useAuth();
+
   const [event, setEvent] = useState(null);
   const [chatActive, setChatActive] = useState(false);
   const [messages, setMessages] = useState([]);
@@ -40,7 +39,7 @@ const EventChat = () => {
   /* CHAT STATUS LISTENER */
   useEffect(() => {
     const unsub = onSnapshot(doc(db, "eventChats", eventId), (snap) => {
-      if (snap.exists()) setChatActive(snap.data().active);
+      if (snap.exists()) setChatActive(snap.data().active === true);
       else setChatActive(false);
     });
     return () => unsub();
@@ -48,6 +47,8 @@ const EventChat = () => {
 
   /* MESSAGES LISTENER */
   useEffect(() => {
+    if (!chatActive) return;
+
     const q = query(
       collection(db, "eventChats", eventId, "messages"),
       orderBy("createdAt")
@@ -58,9 +59,9 @@ const EventChat = () => {
     });
 
     return () => unsub();
-  }, [eventId]);
+  }, [eventId, chatActive]);
 
-  /* AUTO SCROLL TO LATEST MESSAGE */
+  /* AUTO SCROLL */
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -71,35 +72,51 @@ const EventChat = () => {
       minute: "2-digit"
     });
 
+  /* ACCESS CHECKS */
   if (!event) return <p className="chat-empty-msg">Loading event...</p>;
-  if (!chatActive) return <p className="chat-empty-msg">❌ Chat portal closed by organizer</p>;
+
+  if (!chatActive)
+    return <p className="chat-empty-msg">❌ Chat portal closed by organizer</p>;
+
   if (!canAccessChat(user.uid, event))
-    return <p className="chat-empty-msg">❌ You are not allowed to access this chat</p>;
+    return <p className="chat-empty-msg">❌ Access denied</p>;
 
   /* SEND MESSAGE */
   const handleSend = async () => {
     if (!text.trim()) return;
 
-    // Ensure senderName is never undefined
-    const senderName = user.displayName || user.email || "Unknown User";
-    await sendMessage(eventId, user.uid, text, senderName);
-    setText("");
+    try {
+      const senderName =
+        user.displayName || user.email || "Unknown User";
+
+      await sendMessage(eventId, user.uid, text, senderName);
+      setText("");
+    } catch (err) {
+      alert(err.message);
+    }
   };
 
   return (
     <div className="event-chat-container">
       <div className="event-chat-header">
-        <h2>💬 Event Chat</h2>
+        <h2>💬 {event.title} Chat</h2>
       </div>
 
       <div className="messages-container">
         {messages.length === 0 && (
-          <p className="chat-empty-msg">No messages yet. Start the conversation!</p>
+          <p className="chat-empty-msg">
+            No messages yet. Start the conversation!
+          </p>
         )}
+
         {messages.map((msg) => (
           <div
             key={msg.id}
-            className={`message ${msg.senderId === user.uid ? "message-right" : "message-left"}`}
+            className={`message ${
+              msg.senderId === user.uid
+                ? "message-right"
+                : "message-left"
+            }`}
           >
             <div className="message-meta">
               {msg.senderName} • {formatTime(msg.createdAt)}
@@ -116,6 +133,7 @@ const EventChat = () => {
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Type a message..."
+          onKeyDown={(e) => e.key === "Enter" && handleSend()}
         />
         <button onClick={handleSend}>Send</button>
       </div>

@@ -1,6 +1,6 @@
 /* --- CONTAINER --- */
 .dashboard-wrapper, .user-dashboard-container {
-  max-width: 1200px;
+  width: 1200px;
   margin: 0 auto;
   padding: 30px 40px;
   font-family: 'Inter', system-ui, sans-serif;

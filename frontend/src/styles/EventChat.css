@@ -1,6 +1,6 @@
 /* --- CONTAINER --- */
 .event-chat-container {
-  max-width: 700px;
+  width: 700px;
   margin: 40px auto;
   background-color: #f8fafc;
   padding: 20px;

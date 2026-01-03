@@ -32,13 +32,28 @@ export const deleteChatPortal = async (eventId) => {
   });
 };
 
-/* SEND MESSAGE */
-export const sendMessage = async (eventId, userId, text, senderName) => {
-  const messagesRef = collection(db, "eventChats", eventId, "messages");
+/* SEND MESSAGE — NEVER FAILS */
+export const sendMessage = async (eventId, userId, text) => {
+  const chatRef = doc(db, "eventChats", eventId);
+  const chatSnap = await getDoc(chatRef);
+
+  if (!chatSnap.exists() || chatSnap.data().active !== true) {
+    throw new Error("Chat portal is not active");
+  }
+
+  // 🔐 FETCH USER SAFELY
+  const userSnap = await getDoc(doc(db, "users", userId));
+
+  const senderName =
+    userSnap.exists() && userSnap.data().email
+      ? userSnap.data().email
+      : "Unknown User";
+
+  const messagesRef = collection(chatRef, "messages");
 
   await addDoc(messagesRef, {
     senderId: userId,
-    senderName: senderName || "Unknown User", // NEVER undefined
+    senderName, // ✅ GUARANTEED STRING
     text,
     createdAt: serverTimestamp()
   });
