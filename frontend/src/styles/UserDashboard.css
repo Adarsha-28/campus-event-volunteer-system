@@ -1,18 +1,19 @@
 /* --- CONTAINER --- */
-.user-dashboard-container {
+.dashboard-wrapper, .user-dashboard-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 40px 20px;
+  padding: 30px 40px;
   font-family: 'Inter', system-ui, sans-serif;
   background-color: #f8fafc;
   min-height: 100vh;
 }
 
 /* --- HEADER --- */
+.dashboard-header h1,
 .dashboard-header h2 {
   color: #1e3a8a;
   font-size: 2rem;
-  margin-bottom: 5px;
+  margin-bottom: 8px;
 }
 
 .dashboard-header p {
@@ -21,39 +22,50 @@
 }
 
 /* --- EVENTS GRID --- */
+.event-grid,
 .events-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 25px;
   margin-top: 20px;
+  align-items: stretch;
 }
 
 /* --- EVENT CARD --- */
 .event-card {
   background: white;
-  border-radius: 12px;
-  padding: 20px;
+  border-radius: 16px;
+  padding: 24px;
+  width: 100%;
+  max-width: 320px;
   border: 1px solid #e2e8f0;
   display: flex;
   flex-direction: column;
-  transition: all 0.3s ease-in-out;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .event-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+  transform: translateY(-8px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
   border-color: #3b82f6;
 }
 
-.event-card h3 {
-  margin: 0 0 10px 0;
+.event-title, .event-card h3 {
+  font-size: 1.4rem;
+  font-weight: 700;
   color: #1e293b;
+  margin-bottom: 12px;
+  min-height: 3.5rem;
 }
 
-.event-card p {
-  margin: 5px 0;
+.card-body, .event-card p {
+  margin-bottom: 20px;
   color: #475569;
   font-size: 0.95rem;
+}
+
+.card-body strong {
+  color: #1e293b;
 }
 
 /* --- STATUS BADGES --- */
@@ -76,48 +88,7 @@
   color: #b91c1c;
 }
 
-/* --- BUTTONS --- */
-.btn {
-  padding: 10px 16px;
-  border-radius: 8px;
-  border: none;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  margin-top: 10px;
-  font-size: 0.9rem;
-}
-
-.btn-join {
-  background: #3b82f6;
-  color: white;
-}
-
-.btn-join:hover:not(:disabled) {
-  background: #2563eb;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
-}
-
-.btn-join:disabled {
-  background: #e2e8f0;
-  color: #94a3b8;
-  cursor: not-allowed;
-}
-
-.btn-chat {
-  background: #eff6ff;
-  color: #2563eb;
-  border: 1px solid #bfdbfe;
-  margin-left: 10px;
-}
-
-.btn-chat:hover {
-  background: #dbeafe;
-  transform: translateY(-1px);
-}
-
-/* --- VOLUNTEER PROGRESS BAR --- */
+/* --- PROGRESS BAR --- */
 .progress-bar {
   background: #f1f5f9;
   height: 8px;
@@ -132,10 +103,97 @@
   transition: width 0.5s ease-in-out;
 }
 
+/* --- BUTTONS --- */
+.card-footer,
+.org-card-actions {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding-top: 20px;
+}
+
+.join-action-btn,
+.chat-action-btn,
+.btn-join,
+.btn-chat {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: center;
+  outline: none;
+}
+
+.join-action-btn:active,
+.chat-action-btn:active,
+.btn-join:active,
+.btn-chat:active {
+  transform: scale(0.95);
+  filter: brightness(0.9);
+}
+
+/* Join / Joined (Green) */
+.join-ready,
+.joined,
+.btn-join {
+  background-color: #10b981;
+  color: white;
+  border-color: #10b981;
+}
+
+.join-ready:hover,
+.btn-join:hover:not(:disabled) {
+  background-color: #ffffff !important;
+  color: #10b981 !important;
+  border-color: #10b981 !important;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+
+.btn-join:disabled {
+  background: #e2e8f0;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+/* Finished / Full (Red) */
+.finished {
+  background-color: #ef4444;
+  color: white;
+  border-color: #ef4444;
+  cursor: not-allowed;
+}
+
+/* Open Chat Button */
+.chat-action-btn,
+.btn-chat {
+  background-color: transparent;
+  color: #1e40af;
+  border-color: #1e40af;
+  margin-top: 5px;
+}
+
+.chat-action-btn:hover,
+.btn-chat:hover {
+  background-color: #ffffff;
+  box-shadow: 0 4px 12px rgba(30, 64, 175, 0.15);
+  transform: translateY(-2px);
+}
+
+.chat-action-btn:active,
+.btn-chat:active {
+  transform: scale(0.95) translateY(0);
+}
+
 /* --- EMPTY MESSAGE --- */
-.empty-msg {
+.empty-msg,
+.dashboard-wrapper p.loading-text {
   color: #94a3b8;
   font-style: italic;
-  margin-top: 20px;
+  text-align: center;
   font-size: 0.95rem;
+  margin-top: 20px;
 }

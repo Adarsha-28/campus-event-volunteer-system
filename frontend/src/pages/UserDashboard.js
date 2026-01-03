@@ -1,12 +1,10 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import getAllEvents from "../services/eventQueryService";
 import { joinEvent } from "../services/eventService";
 import { useNavigate } from "react-router-dom";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase/firebase";
-
-// Import professional CSS
 import "../styles/UserDashboard.css";
 
 const UserDashboard = () => {
@@ -37,7 +35,6 @@ const UserDashboard = () => {
   /* JOIN EVENT */
   const handleJoin = async (eventId) => {
     if (!user?.uid) return alert("You must be logged in");
-
     try {
       await joinEvent(eventId, user.uid);
       fetchEvents();
@@ -46,14 +43,17 @@ const UserDashboard = () => {
     }
   };
 
-  /* CHECK CHAT STATUS */
   const isChatActive = async (eventId) => {
     const snap = await getDoc(doc(db, "eventChats", eventId));
     return snap.exists() && snap.data().active;
   };
 
-  if (loading) return <p>Loading user info...</p>;
-  if (loadingEvents) return <p>Loading events...</p>;
+  if (loading || loadingEvents)
+    return (
+      <div className="dashboard-wrapper">
+        <p>Loading...</p>
+      </div>
+    );
 
   return (
     <div className="user-dashboard-container">
@@ -78,7 +78,13 @@ const UserDashboard = () => {
             return (
               <div className="event-card" key={event.id}>
                 {/* CARD HEADER */}
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
                   <h3>{event.title}</h3>
                   <span
                     className={`status-badge ${
@@ -103,7 +109,14 @@ const UserDashboard = () => {
                 </div>
 
                 {/* ACTION BUTTONS */}
-                <div style={{ display: "flex", marginTop: "10px", flexWrap: "wrap", gap: "10px" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    marginTop: "10px",
+                    flexWrap: "wrap",
+                    gap: "10px",
+                  }}
+                >
                   {/* JOIN BUTTON */}
                   <button
                     className="btn btn-join"

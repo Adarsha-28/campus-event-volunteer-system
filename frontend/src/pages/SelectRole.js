@@ -34,11 +34,11 @@ const SelectRole = () => {
         createdAt: serverTimestamp()
       });
 
-      // ✅ Update Auth Context
+      // Update Auth Context
       setRole(role);
       setNeedsRoleSelection(false);
 
-      // ✅ Navigate to respective dashboard
+      // Navigate to respective dashboard
       navigate(
         role === "admin"
           ? "/admin"
@@ -82,9 +82,8 @@ const SelectRole = () => {
           onClick={() => selectRole("admin")}
           disabled={saving}
         >
-          {saving ? "Saving..." : "admin"}
+          {saving ? "Saving..." : "Admin"}
         </button>
-
       </div>
     </div>
   );

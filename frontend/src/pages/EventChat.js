@@ -30,7 +30,9 @@ const EventChat = () => {
   useEffect(() => {
     const loadEvent = async () => {
       const snap = await getDoc(doc(db, "events", eventId));
-      if (snap.exists()) setEvent({ id: snap.id, ...snap.data() });
+      if (snap.exists()) {
+        setEvent({ id: snap.id, ...snap.data() });
+      }
     };
     loadEvent();
   }, [eventId]);
@@ -38,7 +40,8 @@ const EventChat = () => {
   /* CHAT STATUS LISTENER */
   useEffect(() => {
     const unsub = onSnapshot(doc(db, "eventChats", eventId), (snap) => {
-      setChatActive(snap.exists() ? snap.data().active : false);
+      if (snap.exists()) setChatActive(snap.data().active);
+      else setChatActive(false);
     });
     return () => unsub();
   }, [eventId]);
@@ -77,6 +80,7 @@ const EventChat = () => {
   const handleSend = async () => {
     if (!text.trim()) return;
 
+    // Ensure senderName is never undefined
     const senderName = user.displayName || user.email || "Unknown User";
     await sendMessage(eventId, user.uid, text, senderName);
     setText("");
