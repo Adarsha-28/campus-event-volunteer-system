@@ -1,6 +1,5 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
-import "../styles/EventChat.css"; 
 import {
   doc,
   getDoc,
@@ -14,6 +13,9 @@ import { useAuth } from "../context/AuthContext";
 import { sendMessage } from "../services/chatService";
 import { canAccessChat } from "../utils/chatUtils";
 
+// Import CSS
+import "../styles/EventChat.css";
+
 const EventChat = () => {
   const { eventId } = useParams();
   const { user } = useAuth();
@@ -21,14 +23,8 @@ const EventChat = () => {
   const [chatActive, setChatActive] = useState(false);
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
-  const scrollRef = useRef();
 
-  /* AUTO SCROLL TO BOTTOM */
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [messages]);
+  const messagesEndRef = useRef(null);
 
   /* LOAD EVENT */
   useEffect(() => {
@@ -45,6 +41,7 @@ const EventChat = () => {
   useEffect(() => {
     const unsub = onSnapshot(doc(db, "eventChats", eventId), (snap) => {
       if (snap.exists()) setChatActive(snap.data().active);
+      else setChatActive(false);
     });
     return () => unsub();
   }, [eventId]);
@@ -63,59 +60,64 @@ const EventChat = () => {
     return () => unsub();
   }, [eventId]);
 
+  /* AUTO SCROLL TO LATEST MESSAGE */
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
   const formatTime = (ts) =>
     ts?.toDate().toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit"
     });
 
-  if (!event) return <div className="chat-status">Loading event...</div>;
-  if (!chatActive) return <div className="chat-status error">❌ Chat portal closed by organizer</div>;
+  if (!event) return <p className="chat-empty-msg">Loading event...</p>;
+  if (!chatActive) return <p className="chat-empty-msg">❌ Chat portal closed by organizer</p>;
   if (!canAccessChat(user.uid, event))
-    return <div className="chat-status error">❌ Access Denied</div>;
+    return <p className="chat-empty-msg">❌ You are not allowed to access this chat</p>;
 
   /* SEND MESSAGE */
   const handleSend = async () => {
     if (!text.trim()) return;
-    await sendMessage(eventId, user.uid, text);
+
+    // Ensure senderName is never undefined
+    const senderName = user.displayName || user.email || "Unknown User";
+    await sendMessage(eventId, user.uid, text, senderName);
     setText("");
   };
 
   return (
-    <div className="chat-page-container">
-      <div className="chat-window">
-        <div className="chat-header">
-          <h3>💬 {event.title} Chat</h3>
-        </div>
+    <div className="event-chat-container">
+      <div className="event-chat-header">
+        <h2>💬 Event Chat</h2>
+      </div>
 
-        <div className="messages-container" ref={scrollRef}>
-          {messages.map((msg) => (
-            <div
-              key={msg.id}
-              className={`message-row ${msg.senderId === user.uid ? "my-message" : "other-message"}`}
-            >
-              <div className="message-bubble">
-                <small className="sender-info">
-                  {msg.senderName} • {formatTime(msg.createdAt)}
-                </small>
-                <div className="message-text">{msg.text}</div>
-              </div>
+      <div className="messages-container">
+        {messages.length === 0 && (
+          <p className="chat-empty-msg">No messages yet. Start the conversation!</p>
+        )}
+        {messages.map((msg) => (
+          <div
+            key={msg.id}
+            className={`message ${msg.senderId === user.uid ? "message-right" : "message-left"}`}
+          >
+            <div className="message-meta">
+              {msg.senderName} • {formatTime(msg.createdAt)}
             </div>
-          ))}
-        </div>
+            <div className="message-text">{msg.text}</div>
+          </div>
+        ))}
+        <div ref={messagesEndRef} />
+      </div>
 
-        <div className="chat-input-area">
-          <input
-            className="chat-input"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSend()}
-            placeholder="Type message..."
-          />
-          <button className="chat-send-btn" onClick={handleSend}>
-            Send
-          </button>
-        </div>
+      <div className="chat-input-container">
+        <input
+          type="text"
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="Type a message..."
+        />
+        <button onClick={handleSend}>Send</button>
       </div>
     </div>
   );

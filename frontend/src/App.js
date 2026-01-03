@@ -1,7 +1,8 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route} from "react-router-dom";
 import Login from "./pages/Login";
 import SelectRole from "./pages/SelectRole";
 import AdminDashboard from "./pages/AdminDashboard";
+import ManageUsers from "./pages/ManageUsers";
 import OrganizerDashboard from "./pages/OrganizerDashboard";
 import UserDashboard from "./pages/UserDashboard";
 import EventChat from "./pages/EventChat";
@@ -12,28 +13,44 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Public */}
+        {/* ---------- PUBLIC ROUTES ---------- */}
         <Route path="/" element={<Login />} />
         <Route path="/select-role" element={<SelectRole />} />
 
-        {/* Protected layout */}
-        <Route element={<MainLayout />}>
-          <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
-            <Route path="/admin" element={<AdminDashboard />} />
-          </Route>
+        {/* ---------- AUTHENTICATED AREA ---------- */}
+        <Route element={<ProtectedRoute />}>
 
-          <Route element={<ProtectedRoute allowedRoles={["organizer"]} />}>
-            <Route path="/organizer" element={<OrganizerDashboard />} />
-          </Route>
+          {/* ---------- LAYOUT ---------- */}
+          <Route element={<MainLayout />}>
 
-          <Route element={<ProtectedRoute allowedRoles={["user"]} />}>
-            <Route path="/user" element={<UserDashboard />} />
-          </Route>
+            {/* ========== ADMIN ROUTES ========== */}
+            <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin/users" element={<ManageUsers />} />
+            </Route>
 
-          <Route
-            element={<ProtectedRoute allowedRoles={["organizer", "user"]} />}
-          >
-            <Route path="/event/:eventId/chat" element={<EventChat />} />
+            {/* ======== ORGANIZER ROUTES ======== */}
+            <Route element={<ProtectedRoute allowedRoles={["organizer"]} />}>
+              <Route
+                path="/organizer"
+                element={<OrganizerDashboard />}
+              />
+            </Route>
+
+            {/* ============ USER ROUTES ============ */}
+            <Route element={<ProtectedRoute allowedRoles={["user"]} />}>
+              <Route path="/user" element={<UserDashboard />} />
+            </Route>
+
+            {/* ======= SHARED CHAT ROUTE ======= */}
+            <Route
+              element={
+                <ProtectedRoute allowedRoles={["organizer", "user"]} />
+              }
+            >
+              <Route path="/event/:eventId/chat" element={<EventChat />} />
+            </Route>
+
           </Route>
         </Route>
       </Routes>
@@ -42,4 +59,3 @@ function App() {
 }
 
 export default App;
-

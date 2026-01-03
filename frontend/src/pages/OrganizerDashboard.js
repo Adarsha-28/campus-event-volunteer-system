@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import "../styles/OrganizerDashboard.css"; 
 import { createEvent, freezeEvent, deleteEvent } from "../services/eventService";
 import getOrganizerEvents from "../services/eventQueryService";
 import { createChatPortal, deleteChatPortal } from "../services/chatService";
 import { useNavigate } from "react-router-dom";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase/firebase";
+
+// Import CSS
+import "../styles/OrganizerDashboard.css";
 
 const OrganizerDashboard = () => {
   const { user } = useAuth();
@@ -21,13 +23,17 @@ const OrganizerDashboard = () => {
     try {
       const snap = await getDoc(doc(db, "eventChats", eventId));
       return snap.exists() && snap.data().active === true;
-    } catch (err) { return false; }
+    } catch (err) {
+      return false;
+    }
   };
 
   const loadEvents = async () => {
     if (!user?.uid) return;
+
     const data = await getOrganizerEvents(user.uid);
     setEvents(data || []);
+
     const statusMap = {};
     for (const ev of data || []) {
       statusMap[ev.id] = await loadChatStatus(ev.id);
@@ -35,14 +41,21 @@ const OrganizerDashboard = () => {
     setChatStatus(statusMap);
   };
 
-  useEffect(() => { loadEvents(); }, [user]);
+  useEffect(() => {
+    loadEvents();
+  }, [user]);
 
   const handleCreate = async () => {
     if (!title || !maxVolunteers) {
       alert("Fill all fields");
       return;
     }
-    await createEvent({ title, maxVolunteers: Number(maxVolunteers) }, user.uid);
+
+    await createEvent(
+      { title, maxVolunteers: Number(maxVolunteers) },
+      user.uid
+    );
+
     setTitle("");
     setMaxVolunteers("");
     loadEvents();
@@ -55,7 +68,7 @@ const OrganizerDashboard = () => {
         <p>Manage your events and volunteer connections</p>
       </header>
 
-      {/* FIXED CREATE EVENT SECTION */}
+      {/* CREATE EVENT */}
       <section className="create-event-card permanent-section">
         <h3>Create New Event</h3>
         <div className="input-group">
@@ -70,15 +83,18 @@ const OrganizerDashboard = () => {
             value={maxVolunteers}
             onChange={(e) => setMaxVolunteers(e.target.value)}
           />
-          <button className="btn-create" onClick={handleCreate}>Create Event</button>
+          <button className="btn-create" onClick={handleCreate}>
+            Create Event
+          </button>
         </div>
       </section>
 
       <hr className="divider" />
 
-      {/* HORIZONTAL EVENTS SECTION */}
+      {/* EVENTS LIST */}
       <section className="events-section">
         <h3>My Active Events</h3>
+
         {events.length === 0 ? (
           <p className="empty-msg">No events created yet.</p>
         ) : (
@@ -87,58 +103,89 @@ const OrganizerDashboard = () => {
               <div key={event.id} className="org-card">
                 <div className="org-card-header">
                   <h4>{event.title}</h4>
-                  <span className={`status-badge ${event.status}`}>{event.status}</span>
+                  <span className={`status-badge ${event.status}`}>
+                    {event.status}
+                  </span>
                 </div>
 
                 <div className="org-card-body">
-                  <div className="progress-container">
-                    <p>Volunteers: <strong>{event.volunteers.length} / {event.maxVolunteers}</strong></p>
-                    <div className="progress-bar">
-                      <div 
-                        className="progress-fill" 
-                        style={{ width: `${(event.volunteers.length / event.maxVolunteers) * 100}%` }}
-                      ></div>
-                    </div>
+                  <p>
+                    Volunteers:{" "}
+                    <strong>
+                      {event.volunteers.length} / {event.maxVolunteers}
+                    </strong>
+                  </p>
+
+                  <div className="progress-bar">
+                    <div
+                      className="progress-fill"
+                      style={{
+                        width: `${
+                          (event.volunteers.length / event.maxVolunteers) * 100
+                        }%`,
+                      }}
+                    />
                   </div>
                 </div>
 
                 <div className="org-card-actions">
                   {event.status === "open" && (
-                    <button className="btn-freeze" onClick={() => {
-                        freezeEvent(event.id);
+                    <button
+                      className="btn-freeze"
+                      onClick={async () => {
+                        await freezeEvent(event.id);
                         loadEvents();
-                    }}>
+                      }}
+                    >
                       Freeze Event
                     </button>
                   )}
 
                   {!chatStatus[event.id] ? (
-                    <button className="btn-chat-create" onClick={async () => {
-                      await createChatPortal(event.id, user.uid);
-                      loadEvents();
-                    }}>
+                    <button
+                      className="btn-chat-create"
+                      onClick={async () => {
+                        await createChatPortal(event.id, user.uid);
+                        loadEvents();
+                      }}
+                    >
                       Create Chat Portal
                     </button>
                   ) : (
                     <div className="chat-action-group">
-                      <button className="btn-chat-open" onClick={() => navigate(`/event/${event.id}/chat`)}>
+                      <button
+                        className="btn-chat-open"
+                        onClick={() =>
+                          navigate(`/event/${event.id}/chat`)
+                        }
+                      >
                         Open Chat
                       </button>
-                      <button className="btn-chat-delete" onClick={async () => {
-                        await deleteChatPortal(event.id);
-                        loadEvents();
-                      }}>
+
+                      <button
+                        className="btn-chat-delete"
+                        onClick={async () => {
+                          await deleteChatPortal(event.id);
+                          loadEvents();
+                        }}
+                      >
                         Delete
                       </button>
                     </div>
                   )}
 
-                  <button className="btn-delete-event" onClick={async () => {
-                    if (window.confirm("Delete this event permanently?")) {
+                  <button
+                    className="btn-delete-event"
+                    onClick={async () => {
+                      const ok = window.confirm(
+                        "Are you sure? This will delete the event and chat permanently."
+                      );
+                      if (!ok) return;
+
                       await deleteEvent(event.id);
                       loadEvents();
-                    }
-                  }}>
+                    }}
+                  >
                     Delete Event
                   </button>
                 </div>

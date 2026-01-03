@@ -14,6 +14,7 @@ const UserDashboard = () => {
   const [events, setEvents] = useState([]);
   const [loadingEvents, setLoadingEvents] = useState(true);
 
+  /* FETCH EVENTS */
   const fetchEvents = async () => {
     try {
       setLoadingEvents(true);
@@ -31,6 +32,7 @@ const UserDashboard = () => {
     if (user) fetchEvents();
   }, [user]);
 
+  /* JOIN EVENT */
   const handleJoin = async (eventId) => {
     if (!user?.uid) return alert("You must be logged in");
     try {
@@ -46,64 +48,110 @@ const UserDashboard = () => {
     return snap.exists() && snap.data().active;
   };
 
-  if (loading || loadingEvents) return <div className="dashboard-wrapper"><p>Loading...</p></div>;
+  if (loading || loadingEvents)
+    return (
+      <div className="dashboard-wrapper">
+        <p>Loading...</p>
+      </div>
+    );
 
   return (
-    <div className="dashboard-wrapper">
+    <div className="user-dashboard-container">
+      {/* HEADER */}
       <div className="dashboard-header">
-        <h1>User Dashboard</h1>
+        <h2>User Dashboard</h2>
         <p>Browse and join events</p>
       </div>
 
-      {events.length === 0 && <p>No events available.</p>}
+      {/* EVENTS GRID */}
+      {events.length === 0 ? (
+        <p className="empty-msg">No events available.</p>
+      ) : (
+        <div className="events-grid">
+          {events.map((event) => {
+            const volunteersCount = event.volunteers?.length || 0;
+            const userJoined = event.volunteers?.includes(user.uid);
+            const canJoin =
+              event.status !== "frozen" &&
+              volunteersCount < event.maxVolunteers;
 
-      {/* This container enables the horizontal layout */}
-      <div className="event-grid">
-        {events.map((event) => {
-          const volunteersCount = event.volunteers?.length || 0;
-          const userJoined = event.volunteers?.includes(user?.uid);
-          const canJoin = event.status !== "frozen" && volunteersCount < event.maxVolunteers;
-
-          return (
-            <div key={event.id} className="event-card">
-              <h3 className="event-title">{event.title}</h3>
-
-              <div className="card-body">
-                <p><strong>Volunteers:</strong> {volunteersCount} / {event.maxVolunteers}</p>
-                <p><strong>Status:</strong> {event.status}</p>
-              </div>
-
-              <button
-  /* DYNAMIC CLASS LOGIC: This picks the right color from your CSS */
-  className={`join-action-btn ${
-    userJoined ? "joined" : canJoin ? "join-ready" : "finished"
-  }`}
-  onClick={() => handleJoin(event.id)}
-  disabled={!canJoin || userJoined}
->
-  {userJoined ? "Joined ✅" : canJoin ? "Join" : "Full / Frozen ❌"}
-</button>
-
-                {userJoined && (
-                  <button
-                    className="chat-action-btn"
-                    onClick={async () => {
-                      const active = await isChatActive(event.id);
-                      if (!active) {
-                        alert("Chat portal not available");
-                        return;
-                      }
-                      navigate(`/event/${event.id}/chat`);
-                    }}
+            return (
+              <div className="event-card" key={event.id}>
+                {/* CARD HEADER */}
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <h3>{event.title}</h3>
+                  <span
+                    className={`status-badge ${
+                      event.status === "open" ? "open" : "frozen"
+                    }`}
                   >
-                    Open Chat
+                    {event.status}
+                  </span>
+                </div>
+
+                {/* VOLUNTEER INFO */}
+                <p>
+                  Volunteers: {volunteersCount} / {event.maxVolunteers}
+                </p>
+                <div className="progress-bar">
+                  <div
+                    className="progress-fill"
+                    style={{
+                      width: `${(volunteersCount / event.maxVolunteers) * 100}%`,
+                    }}
+                  ></div>
+                </div>
+
+                {/* ACTION BUTTONS */}
+                <div
+                  style={{
+                    display: "flex",
+                    marginTop: "10px",
+                    flexWrap: "wrap",
+                    gap: "10px",
+                  }}
+                >
+                  {/* JOIN BUTTON */}
+                  <button
+                    className="btn btn-join"
+                    onClick={() => handleJoin(event.id)}
+                    disabled={!canJoin || userJoined}
+                  >
+                    {userJoined
+                      ? "Joined ✅"
+                      : canJoin
+                      ? "Join"
+                      : "Full / Frozen ❌"}
                   </button>
-                )}
+
+                  {/* OPEN CHAT – ONLY FOR JOINED USERS */}
+                  {userJoined && (
+                    <button
+                      className="btn btn-chat"
+                      onClick={async () => {
+                        const active = await isChatActive(event.id);
+                        if (!active) {
+                          alert("Chat portal not available");
+                          return;
+                        }
+                        navigate(`/event/${event.id}/chat`);
+                      }}
+                    >
+                      Open Chat
+                    </button>
+                  )}
+                </div>
               </div>
-           
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };

@@ -65,6 +65,15 @@
   background: #15803d;
 }
 
+.role-btn.admin {
+  background: #c5b808;
+  color: white;
+}
+
+.role-btn.admin:hover {
+  background: #a2d023;
+}
+
 .role-btn:disabled {
   opacity: 0.7;
   cursor: not-allowed;

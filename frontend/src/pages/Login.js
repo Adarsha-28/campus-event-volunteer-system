@@ -3,6 +3,7 @@ import { googleLogin } from "../firebase/authService";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "../styles/global.css";
+import "../styles/Login.css";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -39,7 +40,7 @@ const Login = () => {
 
   return (
     <div className="login-wrapper">
-      {/* Corner Logo */}
+      {/* Top Brand Header */}
       <header className="brand-header">
         <div className="logo-container">
           <span className="logo-emoji">🤝</span>
@@ -48,22 +49,23 @@ const Login = () => {
       </header>
 
       <div className="main-content">
-        {/* Left Side */}
+        {/* Left Panel */}
         <section className="login-panel">
           <div className="auth-box">
             <h1 className="hero-title">
-              🎓 College Event <br />Volunteer Management System
+              🎓 College Event <br /> Volunteer Management System
             </h1>
+
             <p className="hero-subtitle">
-              A centralized platform designed for students and faculty to manage
-              campus events and volunteer coordination with ease.
+              A centralized platform for students, organizers, and admins to
+              manage campus events and volunteer participation seamlessly.
             </p>
 
             <div className="action-container">
               <button
                 className="google-signin-btn-blue-small"
                 onClick={handleLogin}
-                disabled={signingIn}
+                disabled={signingIn || loading}
               >
                 {signingIn ? "Signing in..." : "Login with Google"}
               </button>
@@ -71,7 +73,7 @@ const Login = () => {
           </div>
         </section>
 
-        {/* Right Side */}
+        {/* Right Panel */}
         <section className="display-panel">
           <div className="visual-container">
             <img
@@ -84,15 +86,19 @@ const Login = () => {
           <div className="about-content">
             <h2 className="about-heading">✨ About VolunteerHub</h2>
             <ul className="feature-list">
-              <li>📅 Find & join campus events easily</li>
-              <li>🤝 Volunteer for technical, cultural & social events</li>
+              <li>📅 Discover and join campus events</li>
+              <li>🤝 Volunteer for cultural, technical & social programs</li>
               <li>🧑‍💼 Organizers manage events & volunteers</li>
-              <li>🛡️ Admins control users, roles & approvals</li>
-              <li>⚡ Secure Google login with role-based access</li>
+              <li>🛡️ Admins control roles, access & approvals</li>
+              <li>⚡ Secure Google login with role-based routing</li>
             </ul>
           </div>
         </section>
       </div>
+
+      <footer className="login-footer">
+        © 2026 Campus Event Volunteer System
+      </footer>
     </div>
   );
 };

@@ -9,7 +9,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 
-/* CREATE CHAT PORTAL*/
+/* CREATE CHAT PORTAL */
 export const createChatPortal = async (eventId, organizerId) => {
   const ref = doc(db, "eventChats", eventId);
   const snap = await getDoc(ref);
@@ -25,25 +25,20 @@ export const createChatPortal = async (eventId, organizerId) => {
   }
 };
 
-/* DELETE CHAT PORTAL*/
+/* DELETE CHAT PORTAL */
 export const deleteChatPortal = async (eventId) => {
   await updateDoc(doc(db, "eventChats", eventId), {
     active: false
   });
 };
 
-/* SEND MESSAGE*/
-export const sendMessage = async (eventId, userId, text) => {
-  const userSnap = await getDoc(doc(db, "users", userId));
-  const senderName = userSnap.exists()
-    ? userSnap.data().name
-    : "Unknown";
-
+/* SEND MESSAGE */
+export const sendMessage = async (eventId, userId, text, senderName) => {
   const messagesRef = collection(db, "eventChats", eventId, "messages");
 
   await addDoc(messagesRef, {
     senderId: userId,
-    senderName,
+    senderName: senderName || "Unknown User", // NEVER undefined
     text,
     createdAt: serverTimestamp()
   });
