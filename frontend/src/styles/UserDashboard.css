@@ -1,0 +1,152 @@
+.dashboard-wrapper {
+  padding: 30px;
+  background-color: #f4f7fe;
+  min-height: 100vh;
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.dashboard-header h1 {
+  color: #1e40af;
+  font-size: 2.2rem;
+  margin-bottom: 8px;
+}
+
+.dashboard-header p {
+  color: #64748b;
+  margin-bottom: 30px;
+}
+
+/* HORIZONTAL LAYOUT ENGINE (Flexbox) */
+.event-grid {
+  display: flex;
+  flex-direction: row;  /* Aligns cards side-by-side */
+  flex-wrap: wrap;      /* Wraps to new line if screen is narrow */
+  gap: 25px;            /* Spacing between boxes */
+  align-items: stretch; /* Ensures all cards in a row have equal height */
+}
+
+/* =========================================
+   2. EVENT CARD STYLING
+   ========================================= */
+
+.event-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  width: 320px;         /* Uniform width for a clean grid */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.event-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  border-color: #3b82f6;
+}
+
+.event-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 12px;
+  min-height: 3.5rem; /* Keeps titles aligned across cards */
+}
+
+.card-body {
+  margin-bottom: 20px;
+}
+
+.card-body p {
+  margin: 8px 0;
+  color: #475569;
+  font-size: 0.95rem;
+}
+
+.card-body strong {
+  color: #1e293b;
+}
+
+/* =========================================
+   3. DYNAMIC BUTTONS (GREEN & RED LOGIC)
+   ========================================= */
+/* --- BUTTONS FOOTER --- */
+.card-footer {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  /* INCREASED GAP: Adds space between Join and Open Chat buttons */
+  gap: 15px; 
+  padding-top: 20px;
+}
+
+/* Shared Button Properties */
+.join-action-btn, .chat-action-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  /* Added 'transform' to transition for the click effect */
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
+  text-align: center;
+  border: 2px solid transparent;
+  outline: none;
+}
+
+/* CLICK EFFECT (The "Pressed" Look) */
+.join-action-btn:active, .chat-action-btn:active {
+  transform: scale(0.95); /* Shrinks slightly when clicked */
+  filter: brightness(0.9); /* Gets slightly darker */
+}
+
+/* GREEN STATE: Join/Joined */
+.join-ready, .joined {
+  background-color: #10b981;
+  color: white;
+  border-color: #10b981;
+}
+
+.join-ready:hover {
+  background-color: #ffffff !important;
+  color: #10b981 !important;
+  border-color: #10b981 !important;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+
+/* RED STATE: Finished/Full */
+.finished {
+  background-color: #ef4444;
+  color: white;
+  border-color: #ef4444;
+  cursor: not-allowed;
+}
+
+/* SECONDARY BUTTON: Open Chat */
+.chat-action-btn {
+  background-color: transparent;
+  color: #1e40af;
+  border-color: #1e40af;
+  /* Added margin-top for extra breathing room if gap isn't enough */
+  margin-top: 5px; 
+}
+
+.chat-action-btn:hover {
+  background-color: #ffffff;
+  box-shadow: 0 4px 12px rgba(30, 64, 175, 0.15);
+  transform: translateY(-2px); /* Lifts up slightly on hover */
+}
+
+/* Re-ensure Active state for Chat button specifically */
+.chat-action-btn:active {
+  transform: scale(0.95) translateY(0);
+}
+
+.dashboard-wrapper p.loading-text {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #1e40af;
+  margin-top: 100px;
+}

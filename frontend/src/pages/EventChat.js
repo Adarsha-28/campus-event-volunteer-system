@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
+import "../styles/EventChat.css"; 
 import {
   doc,
   getDoc,
@@ -20,8 +21,16 @@ const EventChat = () => {
   const [chatActive, setChatActive] = useState(false);
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
+  const scrollRef = useRef();
 
-  /* LOAD EVENT*/
+  /* AUTO SCROLL TO BOTTOM */
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  /* LOAD EVENT */
   useEffect(() => {
     const loadEvent = async () => {
       const snap = await getDoc(doc(db, "events", eventId));
@@ -32,7 +41,7 @@ const EventChat = () => {
     loadEvent();
   }, [eventId]);
 
-  /* CHAT STATUS LISTENER*/
+  /* CHAT STATUS LISTENER */
   useEffect(() => {
     const unsub = onSnapshot(doc(db, "eventChats", eventId), (snap) => {
       if (snap.exists()) setChatActive(snap.data().active);
@@ -40,7 +49,7 @@ const EventChat = () => {
     return () => unsub();
   }, [eventId]);
 
-  /* MESSAGES LISTENER*/
+  /* MESSAGES LISTENER */
   useEffect(() => {
     const q = query(
       collection(db, "eventChats", eventId, "messages"),
@@ -60,10 +69,10 @@ const EventChat = () => {
       minute: "2-digit"
     });
 
-  if (!event) return <p>Loading event...</p>;
-  if (!chatActive) return <p>❌ Chat portal closed by organizer</p>;
+  if (!event) return <div className="chat-status">Loading event...</div>;
+  if (!chatActive) return <div className="chat-status error">❌ Chat portal closed by organizer</div>;
   if (!canAccessChat(user.uid, event))
-    return <p>❌ You are not allowed to access this chat</p>;
+    return <div className="chat-status error">❌ Access Denied</div>;
 
   /* SEND MESSAGE */
   const handleSend = async () => {
@@ -73,52 +82,41 @@ const EventChat = () => {
   };
 
   return (
-    <div style={{ padding: 20 }}>
-      <h2>💬 Event Chat</h2>
+    <div className="chat-page-container">
+      <div className="chat-window">
+        <div className="chat-header">
+          <h3>💬 {event.title} Chat</h3>
+        </div>
 
-      <div
-        style={{
-          border: "1px solid gray",
-          height: 350,
-          overflowY: "auto",
-          padding: 10,
-          marginBottom: 10
-        }}
-      >
-        {messages.map((msg) => (
-          <div
-            key={msg.id}
-            style={{
-              textAlign: msg.senderId === user.uid ? "right" : "left",
-              marginBottom: 8
-            }}
-          >
-            <small>
-              {msg.senderName} • {formatTime(msg.createdAt)}
-            </small>
+        <div className="messages-container" ref={scrollRef}>
+          {messages.map((msg) => (
             <div
-              style={{
-                background: "#f1f1f1",
-                display: "inline-block",
-                padding: "6px 10px",
-                borderRadius: 8
-              }}
+              key={msg.id}
+              className={`message-row ${msg.senderId === user.uid ? "my-message" : "other-message"}`}
             >
-              {msg.text}
+              <div className="message-bubble">
+                <small className="sender-info">
+                  {msg.senderName} • {formatTime(msg.createdAt)}
+                </small>
+                <div className="message-text">{msg.text}</div>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
 
-      <input
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        placeholder="Type message..."
-        style={{ width: "80%" }}
-      />
-      <button onClick={handleSend} style={{ marginLeft: 10 }}>
-        Send
-      </button>
+        <div className="chat-input-area">
+          <input
+            className="chat-input"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSend()}
+            placeholder="Type message..."
+          />
+          <button className="chat-send-btn" onClick={handleSend}>
+            Send
+          </button>
+        </div>
+      </div>
     </div>
   );
 };

@@ -1,0 +1,27 @@
+/* Layout container takes the full viewport height */
+.main-layout {
+  display: flex;
+  flex-direction: column; /* Stacks Navbar on top, Content below */
+  min-height: 100vh;
+  background-color: #f8fafc; /* Light grey/blue professional background */
+}
+
+/* Content area below the Navbar */
+.main-content {
+  flex: 1;                /* Takes up all remaining space */
+  padding: 40px;          /* Balanced padding for dashboard content */
+  width: 100%;
+  max-width: 1400px;      /* Prevents content from getting too wide on huge screens */
+  margin: 0 auto;         /* Centers the content area */
+  
+  /* If your Navbar is 'position: fixed', uncomment the line below: */
+  /* margin-top: 70px; */ 
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+  .main-content {
+    padding: 20px;
+    margin-top: 60px; /* Adjust based on mobile navbar height */
+  }
+}

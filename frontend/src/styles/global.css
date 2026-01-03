@@ -1,0 +1,163 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background-color: #ffffff;
+  color: #1e293b;
+}
+
+.brand-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding: 30px 50px;
+  z-index: 100;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-text {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #1e3a8a; /* Deep Blue Logo */
+}
+
+.main-content {
+  display: flex;
+  min-height: 100vh;
+}
+
+.login-panel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 80px;
+  background-color: #f8fafc;
+}
+
+.auth-box {
+  max-width: 480px;
+}
+
+.hero-title {
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 24px;
+}
+
+.hero-subtitle {
+  font-size: 1.1rem;
+  color: #475569;
+  margin-bottom: 40px;
+}
+
+/* UPDATED BLUE BUTTON */
+.google-signin-btn-blue {
+  width: 100%;
+  padding: 16px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: white;
+  background-color: #1e40af; /* Primary Blue */
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(30, 64, 175, 0.2);
+}
+
+.google-signin-btn-blue:hover {
+  background-color: #1e3a8a; /* Darker Blue on Hover */
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(30, 64, 175, 0.3);
+}
+
+.google-signin-btn-blue:active {
+  transform: translateY(0);
+}
+
+.google-signin-btn-blue:disabled {
+  background-color: #94a3b8;
+  cursor: not-allowed;
+}
+
+.display-panel {
+  flex: 1.2;
+  padding: 60px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.visual-container {
+  width: 100%;
+  height: 380px;
+  border-radius: 20px;
+  overflow: hidden;
+  margin-bottom: 40px;
+  box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+}
+
+.permanent-hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.about-heading {
+  font-size: 1.8rem;
+  color: #1e3a8a;
+  margin-bottom: 25px;
+}
+
+.feature-list {
+  list-style: none;
+}
+
+.feature-list li {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 18px;
+  color: #334155;
+  font-size: 1.05rem;
+}
+
+@media (max-width: 1100px) {
+  .main-content { flex-direction: column; }
+  .display-panel { display: none; } /* Focus on login for mobile */
+}
+/* Update this specific part in your global.css */
+.hero-title {
+  font-size: 2.1rem; /* Slightly smaller to accommodate the longer text */
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 16px;
+  line-height: 1.3;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.google-signin-btn-blue-small {
+  width: 200px; /* Small and compact */
+  padding: 12px 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: white;
+  background-color: #1e40af;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 10px rgba(30, 64, 175, 0.15);
+}

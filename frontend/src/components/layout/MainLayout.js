@@ -1,14 +1,16 @@
 import RoleNavbar from "./RoleNavbar";
 import { Outlet } from "react-router-dom";
+//import "../../styles/MainLayout.css";
+
 
 const MainLayout = () => {
   return (
-    <>
+    <div className="main-layout">
       <RoleNavbar />
-      <div style={{ padding: 20 }}>
+      <div className="main-content">
         <Outlet />
       </div>
-    </>
+    </div>
   );
 };
 
