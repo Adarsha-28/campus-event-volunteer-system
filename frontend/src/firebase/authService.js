@@ -1,18 +1,23 @@
-import { signInWithPopup } from "firebase/auth";
+import { signInWithPopup, signOut } from "firebase/auth";
 import { auth, provider } from "./firebase";
-import { saveUserIfNotExists } from "./userService";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "./firebase";
 
 export const googleLogin = async () => {
-  try {
-    const result = await signInWithPopup(auth, provider);
-    const user = result.user;
-
-    // Save new user to Firestore
-    await saveUserIfNotExists(user);
-
-    return user; // return user to be used if needed
-  } catch (error) {
-    console.error("Google login error:", error);
-    throw error;
+  const result = await signInWithPopup(auth, provider);
+  const user = result.user;
+  // domain check
+  if (!user.email.endsWith("@sece.ac.in")) {
+    await signOut(auth);
+    alert("Use @sece.ac.in email only");
+    throw new Error("Invalid domain");
   }
+
+  const snap = await getDoc(doc(db, "users", user.uid));
+
+  return {
+    user,
+    isNewUser: !snap.exists(),
+    role: snap.exists() ? snap.data().role : null
+  };
 };

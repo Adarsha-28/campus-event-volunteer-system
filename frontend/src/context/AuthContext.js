@@ -3,46 +3,64 @@ import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../firebase/firebase";
 
-const AuthContext = createContext();
+const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [role, setRole] = useState(null);
+  const [needsRoleSelection, setNeedsRoleSelection] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (currentUser) => {
-      if (currentUser) {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      try {
+        if (!currentUser) {
+          setUser(null);
+          setRole(null);
+          setNeedsRoleSelection(false);
+          setLoading(false);
+          return;
+        }
+
         setUser(currentUser);
 
-        try {
-          const snap = await getDoc(doc(db, "users", currentUser.uid));
-          if (snap.exists()) {
-            // Existing user
-            setRole(snap.data().role);
-          } else {
-            // New user → default role = "user"
-            setRole("user");
-          }
-        } catch (error) {
-          console.error("Error fetching user role:", error);
-          setRole("user"); // fallback
+        const ref = doc(db, "users", currentUser.uid);
+        const snap = await getDoc(ref);
+
+        if (snap.exists() && snap.data().role) {
+          setRole(snap.data().role);
+          setNeedsRoleSelection(false);
+        } else {
+          setRole(null);
+          setNeedsRoleSelection(true);
         }
-      } else {
-        setUser(null);
+      } catch (e) {
+        console.error("AuthContext error:", e);
         setRole(null);
+        setNeedsRoleSelection(true);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     });
 
-    return () => unsub();
+    return unsubscribe;
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, role }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        role,
+        needsRoleSelection,
+        loading,
+        setRole,
+        setNeedsRoleSelection
+      }}
+    >
       {!loading && children}
     </AuthContext.Provider>
   );
 };
 
 export const useAuth = () => useContext(AuthContext);
+
