@@ -1,0 +1,39 @@
+.analytics-container {
+  margin-top: 40px;
+}
+
+.analytics-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-bottom: 24px;
+  color: #1f2937;
+}
+
+.analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 30px;
+}
+
+.analytics-card {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 14px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s ease;
+}
+
+.analytics-card:hover {
+  transform: translateY(-4px);
+}
+
+.chart-wrapper {
+  height: 300px;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .analytics-grid {
+    grid-template-columns: 1fr;
+  }
+}

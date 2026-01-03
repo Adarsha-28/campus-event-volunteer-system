@@ -1,0 +1,97 @@
+/* =========================
+   Select Role Page Styling
+   ========================= */
+
+.select-role-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f5f7fa, #e4ebf5);
+  padding: 20px;
+}
+
+.select-role-card {
+  background: #ffffff;
+  padding: 40px 50px;
+  width: 100%;
+  max-width: 420px;
+  border-radius: 14px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+
+.select-role-card h2 {
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #1f2937;
+}
+
+.select-role-card p {
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 30px;
+}
+
+/* Buttons */
+.role-btn {
+  width: 100%;
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  margin-bottom: 15px;
+}
+
+.role-btn.user {
+  background: #2563eb;
+  color: white;
+}
+
+.role-btn.user:hover {
+  background: #1d4ed8;
+}
+
+.role-btn.organizer {
+  background: #16a34a;
+  color: white;
+}
+
+.role-btn.organizer:hover {
+  background: #15803d;
+}
+
+.role-btn.admin {
+  background: #c5b808;
+  color: white;
+}
+
+.role-btn.admin:hover {
+  background: #a2d023;
+}
+
+.role-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Restricted Access */
+.restricted-box {
+  text-align: center;
+  margin-top: 120px;
+}
+
+.restricted-box h3 {
+  font-size: 22px;
+  margin-bottom: 8px;
+  color: #dc2626;
+}
+
+.restricted-box p {
+  color: #6b7280;
+  font-size: 14px;
+}

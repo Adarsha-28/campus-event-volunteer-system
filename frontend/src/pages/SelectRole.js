@@ -3,6 +3,7 @@ import { db } from "../firebase/firebase";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import "../styles/SelectRole.css"; 
 
 const SelectRole = () => {
   const { user, setRole, setNeedsRoleSelection } = useAuth();
@@ -14,7 +15,7 @@ const SelectRole = () => {
   // Restrict college email
   if (!user.email?.endsWith("@sece.ac.in")) {
     return (
-      <div style={{ textAlign: "center", marginTop: 100 }}>
+      <div className="restricted-box">
         <h3>Access Restricted</h3>
         <p>Please login using your @sece.ac.in email</p>
       </div>
@@ -33,11 +34,11 @@ const SelectRole = () => {
         createdAt: serverTimestamp()
       });
 
-      // ✅ UPDATE AUTH CONTEXT
+      // ✅ Update Auth Context
       setRole(role);
       setNeedsRoleSelection(false);
 
-      // ✅ NAVIGATE TO DASHBOARD
+      // ✅ Navigate to respective dashboard
       navigate(
         role === "admin"
           ? "/admin"
@@ -55,19 +56,36 @@ const SelectRole = () => {
   };
 
   return (
-    <div style={{ textAlign: "center", marginTop: 100 }}>
-      <h2>Select Your Role</h2>
-      <p>This is required only once</p>
+    <div className="select-role-wrapper">
+      <div className="select-role-card">
+        <h2>Select Your Role</h2>
+        <p>This is required only once</p>
 
-      <button onClick={() => selectRole("user")} disabled={saving}>
-        {saving ? "Saving..." : "User"}
-      </button>
+        <button
+          className="role-btn user"
+          onClick={() => selectRole("user")}
+          disabled={saving}
+        >
+          {saving ? "Saving..." : "User"}
+        </button>
 
-      <br /><br />
+        <button
+          className="role-btn organizer"
+          onClick={() => selectRole("organizer")}
+          disabled={saving}
+        >
+          {saving ? "Saving..." : "Organizer"}
+        </button>
 
-      <button onClick={() => selectRole("organizer")} disabled={saving}>
-        {saving ? "Saving..." : "Organizer"}
-      </button>
+        <button
+          className="role-btn admin"
+          onClick={() => selectRole("admin")}
+          disabled={saving}
+        >
+          {saving ? "Saving..." : "admin"}
+        </button>
+
+      </div>
     </div>
   );
 };

@@ -1,0 +1,86 @@
+/* Main Navbar Container */
+.navbar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 50px;
+  height: 85px;                /* Large, professional height */
+  background-color: #1e40af;   /* Deep Blue */
+  color: #ffffff;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+/* Left Side Grouping */
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 35px;
+}
+
+/* Role Information Styling */
+.role-info {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid rgba(255, 255, 255, 0.2); /* Separator line */
+  padding-right: 25px;
+}
+
+.role-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: #bfdbfe;
+  font-weight: 600;
+}
+
+.role-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+/* --- BUTTON STYLES --- */
+
+.nav-btn, .logout-btn {
+  padding: 12px 28px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease; /* Smooth transition for hover */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #ffffff; /* White border by default */
+}
+
+/* User/Dashboard Button */
+.nav-btn {
+  background-color: transparent;
+  color: #ffffff;
+}
+
+/* Logout Button */
+.logout-btn {
+  background-color: transparent;
+  color: #ffffff;
+}
+
+/* --- THE WHITE HOVER EFFECT --- */
+
+.nav-btn:hover, .logout-btn:hover {
+  background-color: #ffffff;  /* Turns white on hover */
+  color: #1e40af;            /* Text turns blue on hover to stay readable */
+  transform: translateY(-2px); /* Slight lift */
+  box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
+}
+
+/* Active Click Effect */
+.nav-btn:active, .logout-btn:active {
+  transform: translateY(0);
+  filter: brightness(0.9);
+}

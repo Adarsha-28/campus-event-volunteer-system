@@ -11,7 +11,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 
-/*CREATE EVENT*/
+/* CREATE EVENT */
 export const createEvent = async (event, organizerId) => {
   return await addDoc(collection(db, "events"), {
     ...event,
@@ -22,7 +22,7 @@ export const createEvent = async (event, organizerId) => {
   });
 };
 
-/* JOIN EVENT*/
+/* JOIN EVENT */
 export const joinEvent = async (eventId, userId) => {
   const ref = doc(db, "events", eventId);
   const snap = await getDoc(ref);
@@ -46,26 +46,20 @@ export const joinEvent = async (eventId, userId) => {
   });
 };
 
-/*FREEZE EVENT*/
+/* FREEZE EVENT */
 export const freezeEvent = async (eventId) => {
+  // Update status to "frozen" in Firestore
   await updateDoc(doc(db, "events", eventId), {
     status: "frozen"
   });
 };
 
-/*DELETE EVENT (SAFE CASCADE)*/
+/* DELETE EVENT (SAFE CASCADE) */
 export const deleteEvent = async (eventId) => {
   try {
-    /* 1️⃣ Delete chat messages (if any) */
-    const messagesRef = collection(
-      db,
-      "eventChats",
-      eventId,
-      "messages"
-    );
-
+    // 1️⃣ Delete chat messages (if any)
+    const messagesRef = collection(db, "eventChats", eventId, "messages");
     const messagesSnap = await getDocs(messagesRef);
-
     for (const msg of messagesSnap.docs) {
       try {
         await deleteDoc(msg.ref);
@@ -74,18 +68,16 @@ export const deleteEvent = async (eventId) => {
       }
     }
 
-    /* 2️⃣ Delete chat portal (if exists) */
+    // 2️⃣ Delete chat portal (if exists)
     try {
       await deleteDoc(doc(db, "eventChats", eventId));
     } catch (err) {
       // chat may not exist — ignore safely
     }
 
-    /* 3️⃣ Delete event */
+    // 3️⃣ Delete event
     await deleteDoc(doc(db, "events", eventId));
-
     console.log("✅ Event deleted successfully");
-
   } catch (error) {
     console.error("❌ Failed to delete event:", error);
     throw error;

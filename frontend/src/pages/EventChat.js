@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import {
   doc,
@@ -13,6 +13,9 @@ import { useAuth } from "../context/AuthContext";
 import { sendMessage } from "../services/chatService";
 import { canAccessChat } from "../utils/chatUtils";
 
+// Import CSS
+import "../styles/EventChat.css";
+
 const EventChat = () => {
   const { eventId } = useParams();
   const { user } = useAuth();
@@ -21,26 +24,26 @@ const EventChat = () => {
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
 
-  /* LOAD EVENT*/
+  const messagesEndRef = useRef(null);
+
+  /* LOAD EVENT */
   useEffect(() => {
     const loadEvent = async () => {
       const snap = await getDoc(doc(db, "events", eventId));
-      if (snap.exists()) {
-        setEvent({ id: snap.id, ...snap.data() });
-      }
+      if (snap.exists()) setEvent({ id: snap.id, ...snap.data() });
     };
     loadEvent();
   }, [eventId]);
 
-  /* CHAT STATUS LISTENER*/
+  /* CHAT STATUS LISTENER */
   useEffect(() => {
     const unsub = onSnapshot(doc(db, "eventChats", eventId), (snap) => {
-      if (snap.exists()) setChatActive(snap.data().active);
+      setChatActive(snap.exists() ? snap.data().active : false);
     });
     return () => unsub();
   }, [eventId]);
 
-  /* MESSAGES LISTENER*/
+  /* MESSAGES LISTENER */
   useEffect(() => {
     const q = query(
       collection(db, "eventChats", eventId, "messages"),
@@ -54,71 +57,64 @@ const EventChat = () => {
     return () => unsub();
   }, [eventId]);
 
+  /* AUTO SCROLL TO LATEST MESSAGE */
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
   const formatTime = (ts) =>
     ts?.toDate().toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit"
     });
 
-  if (!event) return <p>Loading event...</p>;
-  if (!chatActive) return <p>❌ Chat portal closed by organizer</p>;
+  if (!event) return <p className="chat-empty-msg">Loading event...</p>;
+  if (!chatActive) return <p className="chat-empty-msg">❌ Chat portal closed by organizer</p>;
   if (!canAccessChat(user.uid, event))
-    return <p>❌ You are not allowed to access this chat</p>;
+    return <p className="chat-empty-msg">❌ You are not allowed to access this chat</p>;
 
   /* SEND MESSAGE */
   const handleSend = async () => {
     if (!text.trim()) return;
-    await sendMessage(eventId, user.uid, text);
+
+    const senderName = user.displayName || user.email || "Unknown User";
+    await sendMessage(eventId, user.uid, text, senderName);
     setText("");
   };
 
   return (
-    <div style={{ padding: 20 }}>
-      <h2>💬 Event Chat</h2>
+    <div className="event-chat-container">
+      <div className="event-chat-header">
+        <h2>💬 Event Chat</h2>
+      </div>
 
-      <div
-        style={{
-          border: "1px solid gray",
-          height: 350,
-          overflowY: "auto",
-          padding: 10,
-          marginBottom: 10
-        }}
-      >
+      <div className="messages-container">
+        {messages.length === 0 && (
+          <p className="chat-empty-msg">No messages yet. Start the conversation!</p>
+        )}
         {messages.map((msg) => (
           <div
             key={msg.id}
-            style={{
-              textAlign: msg.senderId === user.uid ? "right" : "left",
-              marginBottom: 8
-            }}
+            className={`message ${msg.senderId === user.uid ? "message-right" : "message-left"}`}
           >
-            <small>
+            <div className="message-meta">
               {msg.senderName} • {formatTime(msg.createdAt)}
-            </small>
-            <div
-              style={{
-                background: "#f1f1f1",
-                display: "inline-block",
-                padding: "6px 10px",
-                borderRadius: 8
-              }}
-            >
-              {msg.text}
             </div>
+            <div className="message-text">{msg.text}</div>
           </div>
         ))}
+        <div ref={messagesEndRef} />
       </div>
 
-      <input
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        placeholder="Type message..."
-        style={{ width: "80%" }}
-      />
-      <button onClick={handleSend} style={{ marginLeft: 10 }}>
-        Send
-      </button>
+      <div className="chat-input-container">
+        <input
+          type="text"
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="Type a message..."
+        />
+        <button onClick={handleSend}>Send</button>
+      </div>
     </div>
   );
 };

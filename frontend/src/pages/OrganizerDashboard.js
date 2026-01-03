@@ -3,16 +3,16 @@ import { useAuth } from "../context/AuthContext";
 import {
   createEvent,
   freezeEvent,
-  deleteEvent
+  deleteEvent,
 } from "../services/eventService";
 import getOrganizerEvents from "../services/eventQueryService";
-import {
-  createChatPortal,
-  deleteChatPortal
-} from "../services/chatService";
+import { createChatPortal, deleteChatPortal } from "../services/chatService";
 import { useNavigate } from "react-router-dom";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase/firebase";
+
+// Import CSS
+import "../styles/OrganizerDashboard.css";
 
 const OrganizerDashboard = () => {
   const { user } = useAuth();
@@ -69,7 +69,7 @@ const OrganizerDashboard = () => {
   };
 
   return (
-    <>
+    <div className="organizer-dashboard">
       <h2>Organizer Dashboard</h2>
 
       {/* CREATE EVENT */}
@@ -94,96 +94,95 @@ const OrganizerDashboard = () => {
 
       {events.length === 0 && <p>No events created yet</p>}
 
-      {events.map((event) => (
-        <div
-          key={event.id}
-          style={{
-            border: "1px solid gray",
-            margin: 10,
-            padding: 10,
-            borderRadius: 6
-          }}
-        >
-          <h4>{event.title}</h4>
+      <div>
+        {events.map((event) => (
+          <div key={event.id}>
+            <h4>{event.title}</h4>
 
-          <p>
-            Volunteers: {event.volunteers.length} / {event.maxVolunteers}
-          </p>
+            <p>
+              Volunteers: {event.volunteers.length} / {event.maxVolunteers}
+            </p>
 
-          <p>Status: {event.status}</p>
+            <p>Status: {event.status}</p>
 
-          {/* FREEZE EVENT */}
-          {event.status === "open" && (
-            <button onClick={() => freezeEvent(event.id)}>
-              Freeze Event
-            </button>
-          )}
+            <br />
 
-          <br />
-          <br />
-
-          {/* ORGANIZER-ONLY CONTROLS */}
-          {event.organizerId === user.uid && (
-            <>
-              {/* CREATE CHAT */}
-              {!chatStatus[event.id] && (
-                <button
-                  onClick={async () => {
-                    await createChatPortal(event.id, user.uid);
-                    loadEvents();
-                  }}
-                >
-                  Create Chat Portal
-                </button>
-              )}
-
-              {/* OPEN + DELETE CHAT */}
-              {chatStatus[event.id] && (
-                <>
+            {/* ORGANIZER-ONLY CONTROLS */}
+            {event.organizerId === user.uid && (
+              <>
+                {/* FREEZE EVENT BUTTON */}
+                {event.status === "open" && (
                   <button
-                    onClick={() =>
-                      navigate(`/event/${event.id}/chat`)
-                    }
+                    className="btn-freeze"
+                    onClick={async () => {
+                      await freezeEvent(event.id); // update DB
+                      await loadEvents(); // refresh UI to hide this button
+                    }}
                   >
-                    Open Chat
+                    Freeze Event
                   </button>
+                )}
 
+                {/* CREATE CHAT */}
+                {!chatStatus[event.id] && (
                   <button
                     onClick={async () => {
-                      await deleteChatPortal(event.id);
+                      await createChatPortal(event.id, user.uid);
                       loadEvents();
                     }}
-                    style={{ marginLeft: 10, color: "red" }}
+                    style={{ marginLeft: 10 }}
                   >
-                    Delete Chat Portal
+                    Create Chat Portal
                   </button>
-                </>
-              )}
+                )}
 
-              {/* DELETE EVENT */}
-              <button
-                onClick={async () => {
-                  const ok = window.confirm(
-                    "Are you sure? This will delete the event and chat permanently."
-                  );
-                  if (!ok) return;
+                {/* OPEN + DELETE CHAT */}
+                {chatStatus[event.id] && (
+                  <>
+                    <button
+                      onClick={() => navigate(`/event/${event.id}/chat`)}
+                      style={{ marginLeft: 10 }}
+                    >
+                      Open Chat
+                    </button>
 
-                  await deleteEvent(event.id);
-                  loadEvents();
-                }}
-                style={{
-                  marginLeft: 10,
-                  backgroundColor: "#ff4d4d",
-                  color: "white"
-                }}
-              >
-                Delete Event
-              </button>
-            </>
-          )}
-        </div>
-      ))}
-    </>
+                    <button
+                      onClick={async () => {
+                        await deleteChatPortal(event.id);
+                        loadEvents();
+                      }}
+                      style={{ marginLeft: 10, color: "red" }}
+                    >
+                      Delete Chat Portal
+                    </button>
+                  </>
+                )}
+
+                {/* DELETE EVENT */}
+                <button
+                  onClick={async () => {
+                    const ok = window.confirm(
+                      "Are you sure? This will delete the event and chat permanently."
+                    );
+                    if (!ok) return;
+
+                    await deleteEvent(event.id);
+                    loadEvents();
+                  }}
+                  style={{
+                    marginLeft: 10,
+                    backgroundColor: "#ff4d4d",
+                    color: "white",
+                  }}
+                >
+                  Delete Event
+                </button>
+              </>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
   );
 };
 

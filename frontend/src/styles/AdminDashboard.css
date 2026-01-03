@@ -1,0 +1,48 @@
+.admin-container {
+  padding: 30px;
+  font-family: "Segoe UI", sans-serif;
+}
+
+h1 {
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 20px;
+}
+
+.stat-card {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 14px;
+  text-align: center;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+.stat-card h3 {
+  color: #666;
+  font-size: 14px;
+}
+
+.stat-card p {
+  font-size: 26px;
+  font-weight: bold;
+  color: #222;
+}
+
+.admin-actions {
+  margin: 30px 0;
+  text-align: center;
+}
+
+.admin-actions button {
+  background: #2563eb;
+  color: white;
+  padding: 12px 25px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+}

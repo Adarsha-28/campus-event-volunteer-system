@@ -13,8 +13,11 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      setLoading(true);
+
       try {
         if (!currentUser) {
+          // Fully reset state on logout
           setUser(null);
           setRole(null);
           setNeedsRoleSelection(false);
@@ -27,15 +30,15 @@ export const AuthProvider = ({ children }) => {
         const ref = doc(db, "users", currentUser.uid);
         const snap = await getDoc(ref);
 
-        if (snap.exists() && snap.data().role) {
+        if (snap.exists() && snap.data()?.role) {
           setRole(snap.data().role);
           setNeedsRoleSelection(false);
         } else {
           setRole(null);
           setNeedsRoleSelection(true);
         }
-      } catch (e) {
-        console.error("AuthContext error:", e);
+      } catch (error) {
+        console.error("AuthContext error:", error);
         setRole(null);
         setNeedsRoleSelection(true);
       } finally {
@@ -43,7 +46,7 @@ export const AuthProvider = ({ children }) => {
       }
     });
 
-    return unsubscribe;
+    return () => unsubscribe();
   }, []);
 
   return (
@@ -57,10 +60,15 @@ export const AuthProvider = ({ children }) => {
         setNeedsRoleSelection
       }}
     >
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => useContext(AuthContext);
-
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within AuthProvider");
+  }
+  return context;
+};
