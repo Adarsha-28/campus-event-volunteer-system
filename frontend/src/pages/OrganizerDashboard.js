@@ -1,15 +1,9 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import {
-  createEvent,
-  freezeEvent,
-  deleteEvent
-} from "../services/eventService";
+import "../styles/OrganizerDashboard.css"; 
+import { createEvent, freezeEvent, deleteEvent } from "../services/eventService";
 import getOrganizerEvents from "../services/eventQueryService";
-import {
-  createChatPortal,
-  deleteChatPortal
-} from "../services/chatService";
+import { createChatPortal, deleteChatPortal } from "../services/chatService";
 import { useNavigate } from "react-router-dom";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase/firebase";
@@ -23,23 +17,17 @@ const OrganizerDashboard = () => {
   const [events, setEvents] = useState([]);
   const [chatStatus, setChatStatus] = useState({});
 
-  /* SAFE CHAT STATUS LOADER (FIXES PERMISSION ERROR) */
   const loadChatStatus = async (eventId) => {
     try {
       const snap = await getDoc(doc(db, "eventChats", eventId));
       return snap.exists() && snap.data().active === true;
-    } catch (err) {
-      return false;
-    }
+    } catch (err) { return false; }
   };
 
-  /* LOAD ORGANIZER EVENTS */
   const loadEvents = async () => {
     if (!user?.uid) return;
-
     const data = await getOrganizerEvents(user.uid);
     setEvents(data || []);
-
     const statusMap = {};
     for (const ev of data || []) {
       statusMap[ev.id] = await loadChatStatus(ev.id);
@@ -47,143 +35,119 @@ const OrganizerDashboard = () => {
     setChatStatus(statusMap);
   };
 
-  useEffect(() => {
-    loadEvents();
-  }, [user]);
+  useEffect(() => { loadEvents(); }, [user]);
 
-  /* CREATE EVENT */
   const handleCreate = async () => {
     if (!title || !maxVolunteers) {
       alert("Fill all fields");
       return;
     }
-
-    await createEvent(
-      { title, maxVolunteers: Number(maxVolunteers) },
-      user.uid
-    );
-
+    await createEvent({ title, maxVolunteers: Number(maxVolunteers) }, user.uid);
     setTitle("");
     setMaxVolunteers("");
     loadEvents();
   };
 
   return (
-    <>
-      <h2>Organizer Dashboard</h2>
+    <div className="organizer-container">
+      <header className="dashboard-header">
+        <h1>Organizer Dashboard</h1>
+        <p>Manage your events and volunteer connections</p>
+      </header>
 
-      {/* CREATE EVENT */}
-      <h3>Create Event</h3>
-      <input
-        placeholder="Event title"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-      />
-      <input
-        type="number"
-        placeholder="Max volunteers"
-        value={maxVolunteers}
-        onChange={(e) => setMaxVolunteers(e.target.value)}
-      />
-      <button onClick={handleCreate}>Create Event</button>
-
-      <hr />
-
-      {/* EVENTS LIST */}
-      <h3>My Events</h3>
-
-      {events.length === 0 && <p>No events created yet</p>}
-
-      {events.map((event) => (
-        <div
-          key={event.id}
-          style={{
-            border: "1px solid gray",
-            margin: 10,
-            padding: 10,
-            borderRadius: 6
-          }}
-        >
-          <h4>{event.title}</h4>
-
-          <p>
-            Volunteers: {event.volunteers.length} / {event.maxVolunteers}
-          </p>
-
-          <p>Status: {event.status}</p>
-
-          {/* FREEZE EVENT */}
-          {event.status === "open" && (
-            <button onClick={() => freezeEvent(event.id)}>
-              Freeze Event
-            </button>
-          )}
-
-          <br />
-          <br />
-
-          {/* ORGANIZER-ONLY CONTROLS */}
-          {event.organizerId === user.uid && (
-            <>
-              {/* CREATE CHAT */}
-              {!chatStatus[event.id] && (
-                <button
-                  onClick={async () => {
-                    await createChatPortal(event.id, user.uid);
-                    loadEvents();
-                  }}
-                >
-                  Create Chat Portal
-                </button>
-              )}
-
-              {/* OPEN + DELETE CHAT */}
-              {chatStatus[event.id] && (
-                <>
-                  <button
-                    onClick={() =>
-                      navigate(`/event/${event.id}/chat`)
-                    }
-                  >
-                    Open Chat
-                  </button>
-
-                  <button
-                    onClick={async () => {
-                      await deleteChatPortal(event.id);
-                      loadEvents();
-                    }}
-                    style={{ marginLeft: 10, color: "red" }}
-                  >
-                    Delete Chat Portal
-                  </button>
-                </>
-              )}
-
-              {/* DELETE EVENT */}
-              <button
-                onClick={async () => {
-                  const ok = window.confirm(
-                    "Are you sure? This will delete the event and chat permanently."
-                  );
-                  if (!ok) return;
-
-                  await deleteEvent(event.id);
-                  loadEvents();
-                }}
-                style={{
-                  marginLeft: 10,
-                  backgroundColor: "#ff4d4d",
-                  color: "white"
-                }}
-              >
-                Delete Event
-              </button>
-            </>
-          )}
+      {/* FIXED CREATE EVENT SECTION */}
+      <section className="create-event-card permanent-section">
+        <h3>Create New Event</h3>
+        <div className="input-group">
+          <input
+            placeholder="Event Title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+          <input
+            type="number"
+            placeholder="Max Volunteers"
+            value={maxVolunteers}
+            onChange={(e) => setMaxVolunteers(e.target.value)}
+          />
+          <button className="btn-create" onClick={handleCreate}>Create Event</button>
         </div>
-      ))}
-    </>
+      </section>
+
+      <hr className="divider" />
+
+      {/* HORIZONTAL EVENTS SECTION */}
+      <section className="events-section">
+        <h3>My Active Events</h3>
+        {events.length === 0 ? (
+          <p className="empty-msg">No events created yet.</p>
+        ) : (
+          <div className="horizontal-scroll-container">
+            {events.map((event) => (
+              <div key={event.id} className="org-card">
+                <div className="org-card-header">
+                  <h4>{event.title}</h4>
+                  <span className={`status-badge ${event.status}`}>{event.status}</span>
+                </div>
+
+                <div className="org-card-body">
+                  <div className="progress-container">
+                    <p>Volunteers: <strong>{event.volunteers.length} / {event.maxVolunteers}</strong></p>
+                    <div className="progress-bar">
+                      <div 
+                        className="progress-fill" 
+                        style={{ width: `${(event.volunteers.length / event.maxVolunteers) * 100}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="org-card-actions">
+                  {event.status === "open" && (
+                    <button className="btn-freeze" onClick={() => {
+                        freezeEvent(event.id);
+                        loadEvents();
+                    }}>
+                      Freeze Event
+                    </button>
+                  )}
+
+                  {!chatStatus[event.id] ? (
+                    <button className="btn-chat-create" onClick={async () => {
+                      await createChatPortal(event.id, user.uid);
+                      loadEvents();
+                    }}>
+                      Create Chat Portal
+                    </button>
+                  ) : (
+                    <div className="chat-action-group">
+                      <button className="btn-chat-open" onClick={() => navigate(`/event/${event.id}/chat`)}>
+                        Open Chat
+                      </button>
+                      <button className="btn-chat-delete" onClick={async () => {
+                        await deleteChatPortal(event.id);
+                        loadEvents();
+                      }}>
+                        Delete
+                      </button>
+                    </div>
+                  )}
+
+                  <button className="btn-delete-event" onClick={async () => {
+                    if (window.confirm("Delete this event permanently?")) {
+                      await deleteEvent(event.id);
+                      loadEvents();
+                    }
+                  }}>
+                    Delete Event
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+    </div>
   );
 };
 
