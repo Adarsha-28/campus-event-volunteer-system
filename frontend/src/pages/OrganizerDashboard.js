@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import { createEvent, freezeEvent } from "../services/eventService";
+import {
+  createEvent,
+  freezeEvent,
+  deleteEvent
+} from "../services/eventService";
 import getOrganizerEvents from "../services/eventQueryService";
 import {
   createChatPortal,
@@ -19,13 +23,17 @@ const OrganizerDashboard = () => {
   const [events, setEvents] = useState([]);
   const [chatStatus, setChatStatus] = useState({});
 
-  /* LOAD CHAT STATUS*/
+  /* SAFE CHAT STATUS LOADER (FIXES PERMISSION ERROR) */
   const loadChatStatus = async (eventId) => {
-    const snap = await getDoc(doc(db, "eventChats", eventId));
-    return snap.exists() && snap.data().active;
+    try {
+      const snap = await getDoc(doc(db, "eventChats", eventId));
+      return snap.exists() && snap.data().active === true;
+    } catch (err) {
+      return false;
+    }
   };
 
-  /* LOAD ORGANIZER EVENTS*/
+  /* LOAD ORGANIZER EVENTS */
   const loadEvents = async () => {
     if (!user?.uid) return;
 
@@ -43,7 +51,7 @@ const OrganizerDashboard = () => {
     loadEvents();
   }, [user]);
 
-  /* CREATE EVENT*/
+  /* CREATE EVENT */
   const handleCreate = async () => {
     if (!title || !maxVolunteers) {
       alert("Fill all fields");
@@ -114,8 +122,7 @@ const OrganizerDashboard = () => {
           <br />
           <br />
 
-          {/* CHAT CONTROLS
-             (ONLY FOR THIS ORGANIZER'S EVENT)*/}
+          {/* ORGANIZER-ONLY CONTROLS */}
           {event.organizerId === user.uid && (
             <>
               {/* CREATE CHAT */}
@@ -152,6 +159,26 @@ const OrganizerDashboard = () => {
                   </button>
                 </>
               )}
+
+              {/* DELETE EVENT */}
+              <button
+                onClick={async () => {
+                  const ok = window.confirm(
+                    "Are you sure? This will delete the event and chat permanently."
+                  );
+                  if (!ok) return;
+
+                  await deleteEvent(event.id);
+                  loadEvents();
+                }}
+                style={{
+                  marginLeft: 10,
+                  backgroundColor: "#ff4d4d",
+                  color: "white"
+                }}
+              >
+                Delete Event
+              </button>
             </>
           )}
         </div>

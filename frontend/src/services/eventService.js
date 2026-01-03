@@ -5,7 +5,9 @@ import {
   updateDoc,
   getDoc,
   arrayUnion,
-  serverTimestamp
+  serverTimestamp,
+  deleteDoc,
+  getDocs
 } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 
@@ -44,4 +46,21 @@ export const freezeEvent = async (eventId) => {
   await updateDoc(doc(db, "events", eventId), {
     status: "frozen"
   });
+};
+
+/* DELETE EVENT (WITH CHAT CLEANUP) */
+export const deleteEvent = async (eventId) => {
+  // 1️⃣ Delete all chat messages (if chat exists)
+  const messagesRef = collection(db, "eventChats", eventId, "messages");
+  const messagesSnap = await getDocs(messagesRef);
+
+  for (const msg of messagesSnap.docs) {
+    await deleteDoc(msg.ref);
+  }
+
+  // 2️⃣ Delete chat portal doc (if exists)
+  await deleteDoc(doc(db, "eventChats", eventId)).catch(() => {});
+
+  // 3️⃣ Delete event
+  await deleteDoc(doc(db, "events", eventId));
 };
